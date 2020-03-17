@@ -1,5 +1,14 @@
 {
   "projects": {
     "default": "coronavirusexplorer"
+  },
+  "targets": {
+    "coronavirusexplorer": {
+      "hosting": {
+        "ShloudIStayHome": [
+          "coronavirusexplorer"
+        ]
+      }
+    }
   }
 }

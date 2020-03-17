@@ -12,13 +12,26 @@
   "private": true,
   "dependencies": {
     "@angular/animations": "~8.2.14",
+    "@angular/cdk": "^9.1.3",
     "@angular/common": "~8.2.14",
     "@angular/compiler": "~8.2.14",
     "@angular/core": "~8.2.14",
+    "@angular/fire": "^6.0.0-rc.1",
     "@angular/forms": "~8.2.14",
     "@angular/platform-browser": "~8.2.14",
     "@angular/platform-browser-dynamic": "~8.2.14",
+    "@angular/pwa": "^0.900.6",
     "@angular/router": "~8.2.14",
+    "@angular/service-worker": "~8.2.14",
+    "@fortawesome/angular-fontawesome": "^0.4.0",
+    "@fortawesome/fontawesome-svg-core": "^1.2.27",
+    "@fortawesome/free-brands-svg-icons": "^5.12.1",
+    "@fortawesome/free-solid-svg-icons": "^5.12.1",
+    "@ngx-share/button": "^7.1.4",
+    "@ngx-share/buttons": "^7.1.4",
+    "@ngx-share/core": "^7.1.4",
+    "firebase": "^7.8.0",
+    "google-translate": "^3.0.0",
     "rxjs": "~6.4.0",
     "tslib": "^1.10.0",
     "zone.js": "~0.9.1"
@@ -42,6 +55,11 @@
     "protractor": "~5.4.0",
     "ts-node": "~7.0.0",
     "tslint": "~5.15.0",
-    "typescript": "~3.5.3"
+    "typescript": "~3.5.3",
+    "@angular-devkit/architect": "^0.900.0-0 || ^0.900.0",
+    "firebase-tools": "^7.12.1",
+    "fuzzy": "^0.1.3",
+    "inquirer": "^6.2.2",
+    "inquirer-autocomplete-prompt": "^1.0.1"
   }
 }
