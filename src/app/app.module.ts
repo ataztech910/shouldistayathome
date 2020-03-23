@@ -7,17 +7,20 @@ import { ServiceWorkerModule } from '@angular/service-worker';
 import { AngularFireModule } from '@angular/fire';
 import { environment } from '../environments/environment';
 import { AngularFireDatabaseModule } from '@angular/fire/database';
+import { AngularFirestoreModule, AngularFirestore } from '@angular/fire/firestore';
 import { AngularFireAnalyticsModule , CONFIG, ScreenTrackingService } from '@angular/fire/analytics';
 import { HttpClientModule, HttpClientJsonpModule } from '@angular/common/http';
 import { ShareButtonsModule } from '@ngx-share/buttons';
 import { ShareModule } from '@ngx-share/core';
 import { Platform } from '@angular/cdk/platform';
-// import { FontAwesomeModule, FaIconLibrary } from '@fortawesome/angular-fontawesome';
-import { faCoffee, fas } from '@fortawesome/free-solid-svg-icons';
+import { DrawcanvasComponent } from './drawcanvas/drawcanvas.component';
+import { ChoosecolorComponent } from './drawcanvas/choosecolor/choosecolor.component';
 
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent,
+    DrawcanvasComponent,
+    ChoosecolorComponent,
   ],
   imports: [
     HttpClientModule,       // (Required) For share counts
@@ -31,10 +34,11 @@ import { faCoffee, fas } from '@fortawesome/free-solid-svg-icons';
     AppRoutingModule,
     AngularFireModule.initializeApp(environment.firebase),
     AngularFireDatabaseModule,
+    AngularFirestoreModule,
     AngularFireAnalyticsModule,
     ServiceWorkerModule.register('ngsw-worker.js', { enabled: environment.production })
   ],
-  providers: [ {
+    providers: [ {
     provide: CONFIG, useValue: {
       send_page_view: true,
       allow_ad_personalization_signals: false

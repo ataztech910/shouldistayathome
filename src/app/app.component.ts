@@ -1,12 +1,16 @@
 import { Component } from '@angular/core';
 import { AngularFireDatabase, AngularFireObject } from '@angular/fire/database';
+import { AngularFirestore } from '@angular/fire/firestore';
 import 'firebase/database';
 import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
 import { from } from 'rxjs';
+import 'firebase/firestore';
+
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.sass']
+
 })
 export class AppComponent {
   title = 'Sholud I Stay At Home';
@@ -18,12 +22,18 @@ export class AppComponent {
   result: any;
   text: any;
 
-  constructor(db: AngularFireDatabase, private http: HttpClient) {
+  constructor(db: AngularFireDatabase, private http: HttpClient, firestore: AngularFirestore) {
     this.items = db.object('stayathome');
     this.items.snapshotChanges().subscribe(action => {
       this.item = action.payload.val();
       this.translate(this.item);
     });
+    
+    const test = firestore.collection('Drawings');
+    test.snapshotChanges().subscribe(data => {
+      // console.log({data});
+    })
+    
 
   }
   changeMyMind() {
