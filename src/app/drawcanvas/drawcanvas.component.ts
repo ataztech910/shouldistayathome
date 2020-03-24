@@ -4,6 +4,7 @@ import { switchMap, takeUntil, pairwise, finalize } from 'rxjs/operators'
 import { WindowService } from '../services/window.service';
 import { AngularFirestore, AngularFirestoreCollection, AngularFirestoreDocument } from '@angular/fire/firestore';
 import 'firebase/firestore';
+import { lzw } from 'node-lzw';
 
 @Component({
   selector: 'app-drawcanvas',
@@ -17,6 +18,7 @@ export class DrawcanvasComponent implements AfterViewInit  {
   currentDataArray: any;
   lineId: number;
   proxyCoordinates = [];
+  
   constructor(private windowService: WindowService, firestore: AngularFirestore) {
     const sessionId = 'gcQe7xUdjlxcAeMEMKHo';
     this.linesCollection = firestore.doc(`Drawings/${sessionId}`);
@@ -27,31 +29,58 @@ export class DrawcanvasComponent implements AfterViewInit  {
       if(this.currentDataArray && this.currentDataArray.length > 0) {
         this.lineId = this.currentDataArray.length;
         this.currentDataArray.forEach(line => {
-          for(let i = this.lineId; i < line.data.length - 1; i++) {
-            this.drawOnCanvas({ x: line.data[i].data.prevX, y: line.data[i].data.prevY }, 
-                { x: line.data[i].data.nextX, y: line.data[i].data.nextY });
+          const currentLine =  JSON.parse(this.decode(line.data));
+          console.log('Line is ', currentLine);
+          for(let i = 0; i < currentLine.length; i++) {
+            this.drawOnCanvas({ x: currentLine[i].prevX, y: currentLine[i].prevY }, 
+                { x: currentLine[i].nextX, y: currentLine[i].nextY });
           }
         });
       } else {
         this.lineId = 0;
       }
       console.log('data', this.currentDataArray);
-      this.linesCollection.set({coordinates: []});
+      // this.linesCollection.set({coordinates: []});
     });
   }
   // addCoordinates(prevPos, currentPos, lineWidth: number, color: string): void {
+  // ZIP Arrays into Database = TODO move it to service
+  encode (c) {
+    var x = 'charCodeAt',
+    b, e = {},
+    f = c.split(""),
+    d = [],
+    a = f[0],
+    g = 256;
+    for (b = 1; b < f.length; b++) c = f[b], null != e[a + c] ? a += c : (d.push(1 < a.length ? e[a] : a[x](0)), e[a + c] = g, g++, a = c);
+    d.push(1 < a.length ? e[a] : a[x](0));
+    for (b = 0; b < d.length; b++) d[b] = String.fromCharCode(d[b]);
+    return d.join("")
+  }
+  decode (b) {
+    var a, e = {},f,o, d = b.split(""), c = f = d[0],
+    g = [c],
+    h = o = 256;
+    for (b = 1; b < d.length; b++) a = d[b].charCodeAt(0), a = h > a ? d[b] : e[a] ? e[a] : f + c, g.push(a), c = a.charAt(0), e[o] = f + c, o++, f = a;
+    return g.join("")
+  }
+  
   addCoordinates(proxyCoordinates) {
-    console.log('current line is ', this.lineId)
-    console.log('current proxyCoordinates.length is ', proxyCoordinates.length)
+    // console.log('current line is ', this.lineId)
+    // const Base64={_keyStr:"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=",encode:function(e){var t="";var n,r,i,s,o,u,a;var f=0;e=Base64._utf8_encode(e);while(f<e.length){n=e.charCodeAt(f++);r=e.charCodeAt(f++);i=e.charCodeAt(f++);s=n>>2;o=(n&3)<<4|r>>4;u=(r&15)<<2|i>>6;a=i&63;if(isNaN(r)){u=a=64}else if(isNaN(i)){a=64}t=t+this._keyStr.charAt(s)+this._keyStr.charAt(o)+this._keyStr.charAt(u)+this._keyStr.charAt(a)}return t},decode:function(e){var t="";var n,r,i;var s,o,u,a;var f=0;e=e.replace(/[^A-Za-z0-9\+\/\=]/g,"");while(f<e.length){s=this._keyStr.indexOf(e.charAt(f++));o=this._keyStr.indexOf(e.charAt(f++));u=this._keyStr.indexOf(e.charAt(f++));a=this._keyStr.indexOf(e.charAt(f++));n=s<<2|o>>4;r=(o&15)<<4|u>>2;i=(u&3)<<6|a;t=t+String.fromCharCode(n);if(u!=64){t=t+String.fromCharCode(r)}if(a!=64){t=t+String.fromCharCode(i)}}t=Base64._utf8_decode(t);return t},_utf8_encode:function(e){e=e.replace(/\r\n/g,"\n");var t="";for(var n=0;n<e.length;n++){var r=e.charCodeAt(n);if(r<128){t+=String.fromCharCode(r)}else if(r>127&&r<2048){t+=String.fromCharCode(r>>6|192);t+=String.fromCharCode(r&63|128)}else{t+=String.fromCharCode(r>>12|224);t+=String.fromCharCode(r>>6&63|128);t+=String.fromCharCode(r&63|128)}}return t},_utf8_decode:function(e){var t="";var n=0;var r=c1=c2=0;while(n<e.length){r=e.charCodeAt(n);if(r<128){t+=String.fromCharCode(r);n++}else if(r>191&&r<224){c2=e.charCodeAt(n+1);t+=String.fromCharCode((r&31)<<6|c2&63);n+=2}else{c2=e.charCodeAt(n+1);c3=e.charCodeAt(n+2);t+=String.fromCharCode((r&15)<<12|(c2&63)<<6|c3&63);n+=3}}return t}}
+    const zipped = this.encode(JSON.stringify(proxyCoordinates));
+    const unzipped = this.decode(zipped);
+    console.log('current proxyCoordinates zipped', zipped);
+    console.log('current proxyCoordinates unzipped', unzipped);
     if(proxyCoordinates.length === 0) return false;
-    console.log({proxyCoordinates});
-    console.log(this.lineId);
-    console.log('this.currentDataArray before ',this.currentDataArray);
+  //   console.log({proxyCoordinates});
+  //   console.log(this.lineId);
+  //   console.log('this.currentDataArray before ',this.currentDataArray);
     if(!this.currentDataArray[this.lineId]) {
-      this.currentDataArray[this.lineId] = { data : [] };
+      this.currentDataArray[this.lineId] = { data : '', style: {color: 'red', lineWidth: 2} };
     };
-    this.currentDataArray[this.lineId].data = proxyCoordinates;
-    console.log( {coordinates: [...this.currentDataArray]} );
+    this.currentDataArray[this.lineId].data = zipped;
+  //   console.log( {coordinates: [...this.currentDataArray]} );
     this.proxyCoordinates = [];
     this.linesCollection.set({coordinates: this.currentDataArray});
   }
@@ -126,12 +155,12 @@ export class DrawcanvasComponent implements AfterViewInit  {
         // this method we'll implement soon to do the actual drawing
         // this.addCoordinates(prevPos, currentPos, 2, 'red');
         this.drawOnCanvas(prevPos, currentPos);
-        this.prepareCoordinates(prevPos, currentPos, 2, 'red');
+        this.prepareCoordinates(prevPos, currentPos);
       });
   }
   
-  prepareCoordinates(prevPos, currentPos, lineWidth, color) {
-    this.proxyCoordinates.push({data: {prevX: prevPos.x, prevY: prevPos.y, nextX: currentPos.x, nextY: currentPos.y, lineWidth, color}})
+  prepareCoordinates(prevPos, currentPos) {
+    this.proxyCoordinates.push({prevX: prevPos.x, prevY: prevPos.y, nextX: currentPos.x, nextY: currentPos.y})
   }
   private drawOnCanvas(prevPos: { x: number, y: number }, currentPos: { x: number, y: number }) {
     if (!this.cx) { return; }

@@ -32,6 +32,7 @@
     "@ngx-share/core": "^7.1.4",
     "firebase": "^7.8.0",
     "google-translate": "^3.0.0",
+    "node-lzw": "^0.3.1",
     "rxjs": "~6.4.0",
     "tslib": "^1.10.0",
     "zone.js": "~0.9.1"
