@@ -16,6 +16,7 @@ export class DrawcanvasComponent implements AfterViewInit  {
   coordinates: any; // TODO add type for coordinates
   currentDataArray: any;
   lineId: number;
+  proxyCoordinates = [];
   constructor(private windowService: WindowService, firestore: AngularFirestore) {
     const sessionId = 'gcQe7xUdjlxcAeMEMKHo';
     this.linesCollection = firestore.doc(`Drawings/${sessionId}`);
@@ -27,24 +28,32 @@ export class DrawcanvasComponent implements AfterViewInit  {
         this.lineId = this.currentDataArray.length;
         this.currentDataArray.forEach(line => {
           for(let i = this.lineId; i < line.data.length - 1; i++) {
-            this.drawOnCanvas({ x: line.data[i].data.x, y: line.data[i].data.y }, 
-                { x: line.data[i + 1].data.x, y: line.data[i + 1].data.y });
+            this.drawOnCanvas({ x: line.data[i].data.prevX, y: line.data[i].data.prevY }, 
+                { x: line.data[i].data.nextX, y: line.data[i].data.nextY });
           }
         });
       } else {
         this.lineId = 0;
       }
       console.log('data', this.currentDataArray);
+      this.linesCollection.set({coordinates: []});
     });
   }
-  addCoordinates(x: number, y:number, lineWidth: number, color: string): void {
-    // console.log({x, y, lineWidth, color});
+  // addCoordinates(prevPos, currentPos, lineWidth: number, color: string): void {
+  addCoordinates(proxyCoordinates) {
+    console.log('current line is ', this.lineId)
+    console.log('current proxyCoordinates.length is ', proxyCoordinates.length)
+    if(proxyCoordinates.length === 0) return false;
+    console.log({proxyCoordinates});
+    console.log(this.lineId);
+    console.log('this.currentDataArray before ',this.currentDataArray);
     if(!this.currentDataArray[this.lineId]) {
       this.currentDataArray[this.lineId] = { data : [] };
     };
-    this.currentDataArray[this.lineId].data.push({data: {x, y, lineWidth, color}});
-    // console.log( {coordinates: this.currentDataArray} );
-    this.linesCollection.update({coordinates: this.currentDataArray});
+    this.currentDataArray[this.lineId].data = proxyCoordinates;
+    console.log( {coordinates: [...this.currentDataArray]} );
+    this.proxyCoordinates = [];
+    this.linesCollection.set({coordinates: this.currentDataArray});
   }
   ngAfterViewInit(): void {
     const canvasEl: HTMLCanvasElement = this.canvas.nativeElement;
@@ -91,8 +100,9 @@ export class DrawcanvasComponent implements AfterViewInit  {
               // the previous point to the current point    
               pairwise(),
               finalize(() => {
-                this.lineId ++;
                 console.log('Line ID :', this.lineId);
+                this.addCoordinates(this.proxyCoordinates);
+                this.lineId ++;
               })
             )
         })
@@ -114,11 +124,15 @@ export class DrawcanvasComponent implements AfterViewInit  {
         };
   
         // this method we'll implement soon to do the actual drawing
-        this.addCoordinates(currentPos.x, currentPos.y, 2, 'red');
+        // this.addCoordinates(prevPos, currentPos, 2, 'red');
         this.drawOnCanvas(prevPos, currentPos);
+        this.prepareCoordinates(prevPos, currentPos, 2, 'red');
       });
   }
-
+  
+  prepareCoordinates(prevPos, currentPos, lineWidth, color) {
+    this.proxyCoordinates.push({data: {prevX: prevPos.x, prevY: prevPos.y, nextX: currentPos.x, nextY: currentPos.y, lineWidth, color}})
+  }
   private drawOnCanvas(prevPos: { x: number, y: number }, currentPos: { x: number, y: number }) {
     if (!this.cx) { return; }
     this.cx.beginPath();
