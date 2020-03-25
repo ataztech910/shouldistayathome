@@ -24,16 +24,16 @@ export class DrawcanvasComponent implements AfterViewInit  {
     const sessionId = 'gcQe7xUdjlxcAeMEMKHo';
     this.linesCollection = firestore.doc(`Drawings/${sessionId}`);
     this.coordinates = this.linesCollection.valueChanges().subscribe(data => {
-      console.log('this.currentDataArray ', data)
+      // console.log('this.currentDataArray ', data)
       this.currentDataArray = data.coordinates || [];
-      console.log('this.currentDataArray ',this.currentDataArray)
+      // console.log('this.currentDataArray ',this.currentDataArray)
       if(this.currentDataArray && this.currentDataArray.length > 0) {
         this.lineId = this.currentDataArray.length;
         this.currentDataArray.forEach(line => {
           const currentLine =  JSON.parse(this.decode(line.data));
           const lineStyle = line.style;
-          console.log('Line is ', currentLine);
-          console.log('Line is ', lineStyle);
+          // console.log('Line is ', currentLine);
+          // console.log('Line is ', lineStyle);
           for(let i = 0; i < currentLine.length; i++) {
             this.drawOnCanvas({ x: currentLine[i].prevX, y: currentLine[i].prevY }, 
                 { x: currentLine[i].nextX, y: currentLine[i].nextY }, lineStyle.color);
@@ -42,7 +42,7 @@ export class DrawcanvasComponent implements AfterViewInit  {
       } else {
         this.lineId = 0;
       }
-      console.log('data', this.currentDataArray);
+      // console.log('data', this.currentDataArray);
       // this.linesCollection.set({coordinates: []});
     });
   }
@@ -76,8 +76,8 @@ export class DrawcanvasComponent implements AfterViewInit  {
     // const Base64={_keyStr:"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=",encode:function(e){var t="";var n,r,i,s,o,u,a;var f=0;e=Base64._utf8_encode(e);while(f<e.length){n=e.charCodeAt(f++);r=e.charCodeAt(f++);i=e.charCodeAt(f++);s=n>>2;o=(n&3)<<4|r>>4;u=(r&15)<<2|i>>6;a=i&63;if(isNaN(r)){u=a=64}else if(isNaN(i)){a=64}t=t+this._keyStr.charAt(s)+this._keyStr.charAt(o)+this._keyStr.charAt(u)+this._keyStr.charAt(a)}return t},decode:function(e){var t="";var n,r,i;var s,o,u,a;var f=0;e=e.replace(/[^A-Za-z0-9\+\/\=]/g,"");while(f<e.length){s=this._keyStr.indexOf(e.charAt(f++));o=this._keyStr.indexOf(e.charAt(f++));u=this._keyStr.indexOf(e.charAt(f++));a=this._keyStr.indexOf(e.charAt(f++));n=s<<2|o>>4;r=(o&15)<<4|u>>2;i=(u&3)<<6|a;t=t+String.fromCharCode(n);if(u!=64){t=t+String.fromCharCode(r)}if(a!=64){t=t+String.fromCharCode(i)}}t=Base64._utf8_decode(t);return t},_utf8_encode:function(e){e=e.replace(/\r\n/g,"\n");var t="";for(var n=0;n<e.length;n++){var r=e.charCodeAt(n);if(r<128){t+=String.fromCharCode(r)}else if(r>127&&r<2048){t+=String.fromCharCode(r>>6|192);t+=String.fromCharCode(r&63|128)}else{t+=String.fromCharCode(r>>12|224);t+=String.fromCharCode(r>>6&63|128);t+=String.fromCharCode(r&63|128)}}return t},_utf8_decode:function(e){var t="";var n=0;var r=c1=c2=0;while(n<e.length){r=e.charCodeAt(n);if(r<128){t+=String.fromCharCode(r);n++}else if(r>191&&r<224){c2=e.charCodeAt(n+1);t+=String.fromCharCode((r&31)<<6|c2&63);n+=2}else{c2=e.charCodeAt(n+1);c3=e.charCodeAt(n+2);t+=String.fromCharCode((r&15)<<12|(c2&63)<<6|c3&63);n+=3}}return t}}
     const zipped = this.encode(JSON.stringify(proxyCoordinates));
     const unzipped = this.decode(zipped);
-    console.log('current proxyCoordinates zipped', zipped);
-    console.log('current proxyCoordinates unzipped', unzipped);
+    // console.log('current proxyCoordinates zipped', zipped);
+    // console.log('current proxyCoordinates unzipped', unzipped);
     if(proxyCoordinates.length === 0) return false;
   //   console.log({proxyCoordinates});
   //   console.log(this.lineId);
@@ -95,9 +95,9 @@ export class DrawcanvasComponent implements AfterViewInit  {
     this.cx = canvasEl.getContext('2d');
 
     canvasEl.width = this.windowService.windowRef.innerWidth - 20; //this.width;
-    canvasEl.height = this.windowService.windowRef.innerHeight - 100; //this.height;
+    canvasEl.height = this.windowService.windowRef.innerHeight - 90; //this.height;
 
-    console.log('height ', canvasEl.height);
+    // console.log('height ', canvasEl.height);
 
     this.cx.lineWidth = 3;
     this.cx.lineCap = 'round';
@@ -135,7 +135,7 @@ export class DrawcanvasComponent implements AfterViewInit  {
               // the previous point to the current point    
               pairwise(),
               finalize(() => {
-                console.log('Line ID :', this.lineId);
+                // console.log('Line ID :', this.lineId);
                 this.addCoordinates(this.proxyCoordinates);
                 this.lineId ++;
               })

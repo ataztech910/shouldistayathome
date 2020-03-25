@@ -27,6 +27,6 @@ export class ChoosecolorComponent implements OnInit {
   changeColor(colorName) {
     this.currentColor = colorName;
     this.colorChanged.emit(colorName);
-    console.log({colorName});
+    // console.log({colorName});
   }
 }

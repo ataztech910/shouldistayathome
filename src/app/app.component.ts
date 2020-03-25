@@ -59,11 +59,11 @@ export class AppComponent {
         )
       );
 
-    console.log(navigator.language);
+    // console.log(navigator.language);
     const lang = navigator.language.split('-');
     const res = this.http.get(this.url + '?key=' + this.apiKey + '&text=' + params.text + '&lang=' + (lang[0] ? lang[0] : 'en'));
     res.subscribe( (data: any) => {
-      console.log('data ', data.text[0]);
+      // console.log('data ', data.text[0]);
       this.text = data.text[0]
     });
 
