@@ -1,4 +1,4 @@
 <div class="canvasContent">
     <canvas #canvas></canvas>
-    <app-choosecolor></app-choosecolor>
+    <app-choosecolor  (colorChanged)="colorChangedHandler($event)"></app-choosecolor>
 </div>

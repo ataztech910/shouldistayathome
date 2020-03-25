@@ -20,21 +20,28 @@
         cursor: pointer
         margin-top: 0.5rem
         border-radius: 50%
-        &:hover
+        text-align: center
+        line-height: 2.5rem
+        color: #fff
+        &:hover, &--checked
             opacity: 0.5
-        &--red
-            background: red
-        &--green
-            background: green
-        &--blue
-            background: blue
-        &--yellow
-            background: yellow
-        &--black
-            background: black
-        &--pink
-            background: #FFB6C1
-        &--cyan
-            background: cyan
-        &--magenta
-            background: magenta
+        .active
+            width: 1rem
+            height: 1rem
+            transform: rotate(45)
+    .red
+        background: red
+    .green
+        background: green
+    .blue
+        background: blue
+    .yellow
+        background: yellow
+    .black
+        background: black
+    .pink
+        background: #FFB6C1
+    .cyan
+        background: cyan
+    .magenta
+        background: magenta

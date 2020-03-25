@@ -18,22 +18,25 @@ export class DrawcanvasComponent implements AfterViewInit  {
   currentDataArray: any;
   lineId: number;
   proxyCoordinates = [];
-  
+  currentColor = 'black';
+
   constructor(private windowService: WindowService, firestore: AngularFirestore) {
     const sessionId = 'gcQe7xUdjlxcAeMEMKHo';
     this.linesCollection = firestore.doc(`Drawings/${sessionId}`);
-    this.coordinates = this.linesCollection.get().subscribe(data => {
-      console.log('this.currentDataArray ', data.data())
-      this.currentDataArray = data.data().coordinates || [];
+    this.coordinates = this.linesCollection.valueChanges().subscribe(data => {
+      console.log('this.currentDataArray ', data)
+      this.currentDataArray = data.coordinates || [];
       console.log('this.currentDataArray ',this.currentDataArray)
       if(this.currentDataArray && this.currentDataArray.length > 0) {
         this.lineId = this.currentDataArray.length;
         this.currentDataArray.forEach(line => {
           const currentLine =  JSON.parse(this.decode(line.data));
+          const lineStyle = line.style;
           console.log('Line is ', currentLine);
+          console.log('Line is ', lineStyle);
           for(let i = 0; i < currentLine.length; i++) {
             this.drawOnCanvas({ x: currentLine[i].prevX, y: currentLine[i].prevY }, 
-                { x: currentLine[i].nextX, y: currentLine[i].nextY });
+                { x: currentLine[i].nextX, y: currentLine[i].nextY }, lineStyle.color);
           }
         });
       } else {
@@ -42,6 +45,9 @@ export class DrawcanvasComponent implements AfterViewInit  {
       console.log('data', this.currentDataArray);
       // this.linesCollection.set({coordinates: []});
     });
+  }
+  colorChangedHandler(colorName) {
+    this.currentColor = colorName;
   }
   // addCoordinates(prevPos, currentPos, lineWidth: number, color: string): void {
   // ZIP Arrays into Database = TODO move it to service
@@ -77,7 +83,7 @@ export class DrawcanvasComponent implements AfterViewInit  {
   //   console.log(this.lineId);
   //   console.log('this.currentDataArray before ',this.currentDataArray);
     if(!this.currentDataArray[this.lineId]) {
-      this.currentDataArray[this.lineId] = { data : '', style: {color: 'red', lineWidth: 2} };
+      this.currentDataArray[this.lineId] = { data : '', style: {color: this.currentColor, lineWidth: 2} };
     };
     this.currentDataArray[this.lineId].data = zipped;
   //   console.log( {coordinates: [...this.currentDataArray]} );
@@ -154,7 +160,7 @@ export class DrawcanvasComponent implements AfterViewInit  {
   
         // this method we'll implement soon to do the actual drawing
         // this.addCoordinates(prevPos, currentPos, 2, 'red');
-        this.drawOnCanvas(prevPos, currentPos);
+        this.drawOnCanvas(prevPos, currentPos, this.currentColor);
         this.prepareCoordinates(prevPos, currentPos);
       });
   }
@@ -162,14 +168,14 @@ export class DrawcanvasComponent implements AfterViewInit  {
   prepareCoordinates(prevPos, currentPos) {
     this.proxyCoordinates.push({prevX: prevPos.x, prevY: prevPos.y, nextX: currentPos.x, nextY: currentPos.y})
   }
-  private drawOnCanvas(prevPos: { x: number, y: number }, currentPos: { x: number, y: number }) {
+  private drawOnCanvas(prevPos: { x: number, y: number }, currentPos: { x: number, y: number }, currentColor) {
     if (!this.cx) { return; }
     this.cx.beginPath();
     if (prevPos) {
       this.cx.moveTo(prevPos.x, prevPos.y); // from
       this.cx.lineTo(currentPos.x, currentPos.y);
       this.cx.lineWidth = 2;
-      this.cx.strokeStyle = 'red'
+      this.cx.strokeStyle = currentColor;
       this.cx.stroke();
     }
   }
