@@ -5,6 +5,7 @@ import { WindowService } from '../services/window.service';
 import { AngularFirestore, AngularFirestoreCollection, AngularFirestoreDocument } from '@angular/fire/firestore';
 import 'firebase/firestore';
 import { lzw } from 'node-lzw';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-drawcanvas',
@@ -19,10 +20,20 @@ export class DrawcanvasComponent implements AfterViewInit  {
   lineId: number;
   proxyCoordinates = [];
   currentColor = 'black';
-
-  constructor(private windowService: WindowService, firestore: AngularFirestore) {
-    const sessionId = 'gcQe7xUdjlxcAeMEMKHo';
-    this.linesCollection = firestore.doc(`Drawings/${sessionId}`);
+  private sub: any;
+  sessionId: string;
+  defaultId = 'kwPRCS7lvCCbpJ7n3MFV';
+  mousePosition: {};
+  constructor(private windowService: WindowService, firestore: AngularFirestore, private route: ActivatedRoute) {
+    this.sub = this.route.params.subscribe(params => {
+      if (!params['id']) {
+        this.sessionId = this.defaultId;  
+      } else {
+        this.sessionId = params['id']; 
+      }
+    });
+    
+    this.linesCollection = firestore.doc(`Drawings/${this.sessionId}`);
     this.coordinates = this.linesCollection.valueChanges().subscribe(data => {
       // console.log('this.currentDataArray ', data)
       this.currentDataArray = data.coordinates || [];
@@ -78,7 +89,7 @@ export class DrawcanvasComponent implements AfterViewInit  {
     const unzipped = this.decode(zipped);
     // console.log('current proxyCoordinates zipped', zipped);
     // console.log('current proxyCoordinates unzipped', unzipped);
-    if(proxyCoordinates.length === 0) return false;
+    if(zipped.length === 0) return false;
   //   console.log({proxyCoordinates});
   //   console.log(this.lineId);
   //   console.log('this.currentDataArray before ',this.currentDataArray);
@@ -87,8 +98,7 @@ export class DrawcanvasComponent implements AfterViewInit  {
     };
     this.currentDataArray[this.lineId].data = zipped;
   //   console.log( {coordinates: [...this.currentDataArray]} );
-    this.proxyCoordinates = [];
-    this.linesCollection.set({coordinates: this.currentDataArray});
+       this.linesCollection.set({coordinates: this.currentDataArray});
   }
   ngAfterViewInit(): void {
     const canvasEl: HTMLCanvasElement = this.canvas.nativeElement;
@@ -97,7 +107,12 @@ export class DrawcanvasComponent implements AfterViewInit  {
     canvasEl.width = this.windowService.windowRef.innerWidth - 20; //this.width;
     canvasEl.height = this.windowService.windowRef.innerHeight - 90; //this.height;
 
-    // console.log('height ', canvasEl.height);
+    // let backgroundImage = new Image();
+    // backgroundImage.src = 'http://clipart-library.com/coloring/Bdir6ekc9.jpg';
+    // backgroundImage.onload = () => {
+    //   console.log('backgroundImage ',backgroundImage);
+    //   this.cx.drawImage(backgroundImage, 100, 0);
+    // }
 
     this.cx.lineWidth = 3;
     this.cx.lineCap = 'round';
@@ -119,6 +134,17 @@ export class DrawcanvasComponent implements AfterViewInit  {
     const mergeEventsStart = merge(mouseDown, touchDown);
     const mergeEventsMove = merge(mouseMove, touchMove);
     // fromEvent(canvasEl, 'mousedown')
+
+    mergeEventsMove.pipe(
+    ).subscribe((res: any) => {
+      // console.log('res', res);
+      this.mousePosition = {
+        x: res.offsetX,
+        y: res.offsetY
+      }
+      // console.log('res', this.mousePosition);
+    });
+
     mergeEventsStart
       .pipe(
         switchMap((e) => {
@@ -136,8 +162,14 @@ export class DrawcanvasComponent implements AfterViewInit  {
               pairwise(),
               finalize(() => {
                 // console.log('Line ID :', this.lineId);
-                this.addCoordinates(this.proxyCoordinates);
+                if(this.proxyCoordinates.length > 0){
+                  this.addCoordinates(this.proxyCoordinates);
+                } else {
+                  this.addCoordinates(this.mousePosition);
+                  this.drawDot(this.mousePosition, this.currentColor);
+                }
                 this.lineId ++;
+                this.proxyCoordinates = [];
               })
             )
         })
@@ -157,7 +189,8 @@ export class DrawcanvasComponent implements AfterViewInit  {
           x: currentClientX - rect.left,
           y: currentClientY - rect.top
         };
-  
+        // console.log(prevPos)
+        // console.log(currentPos)
         // this method we'll implement soon to do the actual drawing
         // this.addCoordinates(prevPos, currentPos, 2, 'red');
         this.drawOnCanvas(prevPos, currentPos, this.currentColor);
@@ -168,10 +201,19 @@ export class DrawcanvasComponent implements AfterViewInit  {
   prepareCoordinates(prevPos, currentPos) {
     this.proxyCoordinates.push({prevX: prevPos.x, prevY: prevPos.y, nextX: currentPos.x, nextY: currentPos.y})
   }
+  private drawDot(coordinates, currentColor) {
+    if (!this.cx) { return; }
+    this.cx.beginPath();
+    this.cx.arc(coordinates.x, coordinates.y, 0.3 , 0, 2 * Math.PI);
+    this.cx.lineWidth = 2;
+    this.cx.strokeStyle = currentColor;
+    this.cx.stroke();
+  }
   private drawOnCanvas(prevPos: { x: number, y: number }, currentPos: { x: number, y: number }, currentColor) {
     if (!this.cx) { return; }
     this.cx.beginPath();
     if (prevPos) {
+      // this.cx.arc(currentPos.x, currentPos.y, 2, 0, 2 * Math.PI);
       this.cx.moveTo(prevPos.x, prevPos.y); // from
       this.cx.lineTo(currentPos.x, currentPos.y);
       this.cx.lineWidth = 2;

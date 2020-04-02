@@ -1,10 +1,10 @@
 import { Component } from '@angular/core';
-import { AngularFireDatabase, AngularFireObject } from '@angular/fire/database';
-import { AngularFirestore } from '@angular/fire/firestore';
+import { AngularFirestore, AngularFirestoreCollection } from '@angular/fire/firestore';
 import 'firebase/database';
-import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
-import { from } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { from, Observable } from 'rxjs';
 import 'firebase/firestore';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-root',
@@ -14,30 +14,25 @@ import 'firebase/firestore';
 })
 export class AppComponent {
   title = 'Sholud I Stay At Home';
-  items: AngularFireObject<any>;
-  item: any;
+  private itemsCollection: AngularFirestoreCollection<any>;
+  items: Observable<any>;
 
   apiKey = 'trnsl.1.1.20200312T100508Z.f31964198bfb9a51.2a3d49e3b96be59bc155a8ddc080ae3f6f65f433';
   url = 'https://translate.yandex.net/api/v1.5/tr.json/translate';
   result: any;
   text: any;
 
-  constructor(db: AngularFireDatabase, private http: HttpClient, firestore: AngularFirestore) {
-    this.items = db.object('stayathome');
-    this.items.snapshotChanges().subscribe(action => {
-      this.item = action.payload.val();
-      this.translate(this.item);
-    });
-    
-    const test = firestore.collection('Drawings');
-    test.snapshotChanges().subscribe(data => {
-      // console.log({data});
-    })
-    
-
+  constructor(private router: Router, firestore: AngularFirestore, private http: HttpClient) {
+    // this.items = db.object('stayathome');
+    // this.items.snapshotChanges().subscribe(action => {
+    //   this.item = action.payload.val();
+    //   this.translate(this.item);
+    // });
+    this.itemsCollection = firestore.collection<any>('Drawings');
+    this.items = this.itemsCollection.valueChanges();
   }
   changeMyMind() {
-    this.items.set(!this.item);
+    // this.items.set(!this.item);
   }
 
   translate(status): void {
@@ -67,5 +62,16 @@ export class AppComponent {
       this.text = data.text[0]
     });
 
-   }
+  }
+
+  addCanvas() {
+    const item = {
+      coordinates: []
+    }
+    this.itemsCollection.add(item).then( docRef => {
+      console.log(docRef.id);
+      location.href = '/'+docRef.id
+    })
+    
+  }
 }

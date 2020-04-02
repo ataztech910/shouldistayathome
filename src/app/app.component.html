@@ -4,11 +4,13 @@
 
 <!-- Toolbar -->
 <div class="toolbar">
-  <img _ngcontent-swj-c0="" alt="" src="../assets/logo.png" width="40">
-  Draw for the helthy world
+  <a href="/"><img _ngcontent-swj-c0="" alt="" src="../assets/logo.png" width="40"></a>
+  <!-- <div class="roundButton">+</div> -->
+  Draw for the healthy world
+  <div class="roundButton" (click)="addCanvas()">add canvas</div>
 </div>
 
-<app-drawcanvas></app-drawcanvas>
+<!-- <app-drawcanvas></app-drawcanvas> -->
 <!-- 
 <div class="button" (click)="changeMyMind()">
   <span class="uppercase" >{{text}}</span>
