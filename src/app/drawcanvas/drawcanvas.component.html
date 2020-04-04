@@ -1,4 +1,5 @@
 <div class="canvasContent">
+    <div id="drawerCursor"></div>
     <canvas #canvas></canvas>
-    <app-choosecolor  (colorChanged)="colorChangedHandler($event)"></app-choosecolor>
+    <app-choosecolor  (clearedCanvas)="clearCanvasHandler($event)" (colorChanged)="colorChangedHandler($event)"></app-choosecolor>
 </div>

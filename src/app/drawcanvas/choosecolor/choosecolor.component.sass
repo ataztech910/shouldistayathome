@@ -14,8 +14,7 @@
     background: #1E90FF
     box-shadow: 5px 5px 23px -8px rgba(0,0,0,0.75)
     .color
-        max-width: 3rem
-        max-width: 3rem
+        max-width: 2.5rem
         min-width: 2.5rem
         min-height: 2.5rem
         cursor: pointer
@@ -24,12 +23,17 @@
         text-align: center
         line-height: 2.5rem
         color: #fff
+        img
+            width: 100%
         &:hover, &--checked
             opacity: 0.5
         .active
             width: 1rem
             height: 1rem
             transform: rotate(45)
+            &--white
+                border-right: 0
+                border-bottom: 0
     .red
         background: red
     .green
@@ -46,3 +50,7 @@
         background: cyan
     .magenta
         background: magenta
+    .white
+        background: #fff
+        border: 1px #000
+        border-style: dashed

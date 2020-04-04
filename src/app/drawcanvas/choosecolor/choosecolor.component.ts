@@ -6,8 +6,10 @@ import { Component, OnInit, Output, EventEmitter } from '@angular/core';
   styleUrls: ['./choosecolor.component.sass']
 })
 export class ChoosecolorComponent implements OnInit {
+
   @Output() colorChanged: EventEmitter<number> =   new EventEmitter();
-  
+  @Output() clearedCanvas: EventEmitter<boolean> =   new EventEmitter();
+
   colors = [
     'black',
     'red',
@@ -16,14 +18,17 @@ export class ChoosecolorComponent implements OnInit {
     'yellow',
     'pink',
     'magenta',
-    'cyan'
+    'cyan',
+    'white'
   ];
   currentColor = 'black'
   constructor() { }
 
   ngOnInit() {
   }
-
+  clearCanvas() {
+    this.clearedCanvas.emit(true);
+  }
   changeColor(colorName) {
     this.currentColor = colorName;
     this.colorChanged.emit(colorName);

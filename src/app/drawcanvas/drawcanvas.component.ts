@@ -24,6 +24,7 @@ export class DrawcanvasComponent implements AfterViewInit  {
   sessionId: string;
   defaultId = 'kwPRCS7lvCCbpJ7n3MFV';
   mousePosition: {};
+  lineHeight = 5;
   constructor(private windowService: WindowService, firestore: AngularFirestore, private route: ActivatedRoute) {
     this.sub = this.route.params.subscribe(params => {
       if (!params['id']) {
@@ -43,25 +44,39 @@ export class DrawcanvasComponent implements AfterViewInit  {
         this.currentDataArray.forEach(line => {
           const currentLine =  JSON.parse(this.decode(line.data));
           const lineStyle = line.style;
-          // console.log('Line is ', currentLine);
           // console.log('Line is ', lineStyle);
-          for(let i = 0; i < currentLine.length; i++) {
-            this.drawOnCanvas({ x: currentLine[i].prevX, y: currentLine[i].prevY }, 
-                { x: currentLine[i].nextX, y: currentLine[i].nextY }, lineStyle.color);
+          if(currentLine.x){
+            this.drawDot(currentLine, lineStyle.color, lineStyle.lineWidth);
+          } 
+          else {
+            for(let i = 0; i < currentLine.length; i++) {
+                this.drawOnCanvas({ x: currentLine[i].prevX, y: currentLine[i].prevY }, 
+                  { x: currentLine[i].nextX, y: currentLine[i].nextY }, lineStyle.color, lineStyle.lineWidth);
+            }
           }
         });
       } else {
         this.lineId = 0;
       }
-      // console.log('data', this.currentDataArray);
-      // this.linesCollection.set({coordinates: []});
     });
   }
+  clearCanvasHandler(status) {
+    if (status) {
+      this.linesCollection.set({coordinates: []});
+      this.cx.clearRect(0, 0, this.windowService.windowRef.innerWidth - 20, this.windowService.windowRef.innerHeight - 90);
+    }
+  }
   colorChangedHandler(colorName) {
+    if(colorName === 'white') {
+      this.lineHeight = 30;
+    } else {
+      this.lineHeight = 5;
+    }
     this.currentColor = colorName;
   }
   // addCoordinates(prevPos, currentPos, lineWidth: number, color: string): void {
-  // ZIP Arrays into Database = TODO move it to service
+  // ZIP Arrays into Database = 
+  // TODO move it to service
   encode (c) {
     var x = 'charCodeAt',
     b, e = {},
@@ -94,7 +109,7 @@ export class DrawcanvasComponent implements AfterViewInit  {
   //   console.log(this.lineId);
   //   console.log('this.currentDataArray before ',this.currentDataArray);
     if(!this.currentDataArray[this.lineId]) {
-      this.currentDataArray[this.lineId] = { data : '', style: {color: this.currentColor, lineWidth: 2} };
+      this.currentDataArray[this.lineId] = { data : '', style: {color: this.currentColor, lineWidth: this.lineHeight} };
     };
     this.currentDataArray[this.lineId].data = zipped;
   //   console.log( {coordinates: [...this.currentDataArray]} );
@@ -134,6 +149,7 @@ export class DrawcanvasComponent implements AfterViewInit  {
     const mergeEventsStart = merge(mouseDown, touchDown);
     const mergeEventsMove = merge(mouseMove, touchMove);
     // fromEvent(canvasEl, 'mousedown')
+    const follower = document.getElementById('drawerCursor');
 
     mergeEventsMove.pipe(
     ).subscribe((res: any) => {
@@ -142,6 +158,8 @@ export class DrawcanvasComponent implements AfterViewInit  {
         x: res.offsetX,
         y: res.offsetY
       }
+      // follower.style.top = res.offsetY + 'px'
+      // follower.style.left = res.offsetX + 'px'
       // console.log('res', this.mousePosition);
     });
 
@@ -166,10 +184,11 @@ export class DrawcanvasComponent implements AfterViewInit  {
                   this.addCoordinates(this.proxyCoordinates);
                 } else {
                   this.addCoordinates(this.mousePosition);
-                  this.drawDot(this.mousePosition, this.currentColor);
+                  this.drawDot(this.mousePosition, this.currentColor, this.lineHeight);
                 }
                 this.lineId ++;
                 this.proxyCoordinates = [];
+                // if (this.lineHeight === 30) this.lineHeight = 5;
               })
             )
         })
@@ -189,11 +208,13 @@ export class DrawcanvasComponent implements AfterViewInit  {
           x: currentClientX - rect.left,
           y: currentClientY - rect.top
         };
+        // follower.style.top = currentPos.y + 'px'
+        // follower.style.left = currentPos.x + 'px'
         // console.log(prevPos)
         // console.log(currentPos)
         // this method we'll implement soon to do the actual drawing
         // this.addCoordinates(prevPos, currentPos, 2, 'red');
-        this.drawOnCanvas(prevPos, currentPos, this.currentColor);
+        this.drawOnCanvas(prevPos, currentPos, this.currentColor, this.lineHeight);
         this.prepareCoordinates(prevPos, currentPos);
       });
   }
@@ -201,22 +222,23 @@ export class DrawcanvasComponent implements AfterViewInit  {
   prepareCoordinates(prevPos, currentPos) {
     this.proxyCoordinates.push({prevX: prevPos.x, prevY: prevPos.y, nextX: currentPos.x, nextY: currentPos.y})
   }
-  private drawDot(coordinates, currentColor) {
+  private drawDot(coordinates, currentColor, lineHeight) {
+    // console.log('coordinates',coordinates);
     if (!this.cx) { return; }
     this.cx.beginPath();
     this.cx.arc(coordinates.x, coordinates.y, 0.3 , 0, 2 * Math.PI);
-    this.cx.lineWidth = 2;
+    this.cx.lineWidth = lineHeight;
     this.cx.strokeStyle = currentColor;
     this.cx.stroke();
   }
-  private drawOnCanvas(prevPos: { x: number, y: number }, currentPos: { x: number, y: number }, currentColor) {
+  private drawOnCanvas(prevPos: { x: number, y: number }, currentPos: { x: number, y: number }, currentColor, lineHeight) {
     if (!this.cx) { return; }
     this.cx.beginPath();
     if (prevPos) {
       // this.cx.arc(currentPos.x, currentPos.y, 2, 0, 2 * Math.PI);
       this.cx.moveTo(prevPos.x, prevPos.y); // from
       this.cx.lineTo(currentPos.x, currentPos.y);
-      this.cx.lineWidth = 2;
+      this.cx.lineWidth = lineHeight;
       this.cx.strokeStyle = currentColor;
       this.cx.stroke();
     }

@@ -1,10 +1,17 @@
 <div class="chooseColor">
     <div class="colorLine firstLine">
         <ng-template ngFor let-color [ngForOf]="colors">
-            <div class="color {{color}}" (click)="changeColor(color)">
+            <div class="color {{color}}" (click)="changeColor(color)" *ngIf="color !== 'white'">
                 <div *ngIf="color === currentColor" class="active {{color}}"></div>
-            </div>
+            </div>            
         </ng-template>
+        <div class="color white" (click)="changeColor('white')">
+            <div *ngIf="currentColor === 'white'" class="active white active--white"></div>
+        </div>
+        <div class="color" (click)="clearCanvas()">
+            <img src="/assets/trash.svg" />
+        </div>
+        
     </div>
 </div>
 

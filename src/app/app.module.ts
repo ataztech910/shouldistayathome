@@ -15,7 +15,7 @@ import { ShareModule } from '@ngx-share/core';
 import { Platform } from '@angular/cdk/platform';
 import { DrawcanvasComponent } from './drawcanvas/drawcanvas.component';
 import { ChoosecolorComponent } from './drawcanvas/choosecolor/choosecolor.component';
-
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 @NgModule({
   declarations: [
     AppComponent,
@@ -23,6 +23,7 @@ import { ChoosecolorComponent } from './drawcanvas/choosecolor/choosecolor.compo
     ChoosecolorComponent,
   ],
   imports: [
+    FontAwesomeModule,
     HttpClientModule,       // (Required) For share counts
     HttpClientJsonpModule,  // (Optional) Add if you want tumblr share counts
     ShareModule,
