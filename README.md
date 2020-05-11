@@ -1,5 +1,5 @@
 # ShouldIStayAtHome.com
-Multiuser opens-source whiteboard
+Multi-user opens-source WhiteBoard
 
 npm i - to get all packages \ 
 npm run start - to start server \
