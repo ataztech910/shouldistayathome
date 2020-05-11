@@ -1,4 +1,4 @@
-# ShouldIStayatHome.com
+# ShouldIStayAtHome.com
 Multiuser opens-source whiteboard
 
 npm i - to get all packages \ 
